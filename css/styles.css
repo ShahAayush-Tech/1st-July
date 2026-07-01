@@ -1,0 +1,966 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+body {
+  background: #050505; color: #F5E6C8;
+  font-family: 'Cormorant Garamond', serif;
+  overflow: hidden; height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#vignette {
+  position: fixed; inset: 0; z-index: 98; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+}
+#transition-overlay {
+  position: fixed; inset: 0; z-index: 100; pointer-events: none;
+  background: #050505; opacity: 0;
+}
+
+.page {
+  display: none; position: absolute; inset: 0;
+  width: 100%; height: 100vh; overflow: hidden;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.page:first-of-type { display: flex; }
+
+/* ==============================
+   PRELOADER - GRAND MYSTIC DOORWAY
+============================== */
+#preloader {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background: #050302;
+}
+
+.preloader-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse at 50% 40%, #1a0f08 0%, #0a0604 40%, #000 100%);
+}
+
+.preloader-magic-glow {
+  position: absolute; z-index: 1;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(80vw, 700px); height: min(80vw, 700px);
+  background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 25%, transparent 65%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== GRAND DOORWAY CONTAINER ===== */
+.door-materialize {
+  position: relative; z-index: 3;
+  width: clamp(260px, 40vw, 480px);
+  aspect-ratio: 1 / 1.45;
+  opacity: 0;
+  transform: scale(0.5);
+  perspective: 1200px;
+}
+
+/* ===== STONE ARCH SURROUND ===== */
+.stone-arch {
+  position: absolute; inset: 0;
+}
+
+/* Left & right pillars */
+.stone-pillar {
+  position: absolute; top: 0; width: 14%; height: 88%;
+  background: linear-gradient(90deg, #2a2218, #3a3024, #2a2218);
+  border-radius: 3px;
+}
+.stone-pillar::after {
+  content: '';
+  position: absolute; inset: 6% 8%;
+  border-right: 1px solid rgba(80,60,40,0.2);
+  border-left: 1px solid rgba(80,60,40,0.2);
+  height: 88%;
+}
+.stone-pillar-l { left: 0; }
+.stone-pillar-r { right: 0; }
+
+/* Arch top with keystone */
+.stone-arch-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 32%;
+  background:
+    radial-gradient(ellipse 70% 100% at 50% 100%, transparent 58%, #2a2218 58.5%, #3a3024 59.5%, #2a2218 100%);
+  z-index: 1;
+}
+
+.keystone {
+  position: absolute;
+  top: 2%; left: 50%; transform: translateX(-50%);
+  width: 12%; height: 14%;
+  background: linear-gradient(180deg, #3a3024, #2a2218);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  z-index: 2;
+}
+.keystone::after {
+  content: '\2726';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(0.5rem, 1.2vw, 0.8rem);
+  color: rgba(212,175,55,0.3);
+}
+
+/* Glowing runes on arch */
+.rune {
+  position: absolute; top: 12%;
+  font-size: clamp(1rem, 3vw, 2rem);
+  color: rgba(212,175,55,0.15);
+  text-shadow: 0 0 20px rgba(212,175,55,0.1);
+  z-index: 2;
+  opacity: 0;
+}
+.rune-l { left: 18%; }
+.rune-r { right: 18%; }
+
+/* Stone sill at bottom */
+.stone-sill {
+  position: absolute; bottom: 0; left: -2%; right: -2%;
+  height: 10%;
+  background: linear-gradient(180deg, #2a2218, #1a140e);
+  border-radius: 2px 2px 6px 6px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* ===== THE DOOR INSIDE THE ARCH ===== */
+.door-materialize-frame {
+  position: absolute;
+  top: 4%; left: 14%; right: 14%; bottom: 10%;
+  border-radius: 30% 30% 4px 4px / 40% 40% 4px 4px;
+  background: linear-gradient(145deg, #3a2818, #2a1a0c, #1a0e06);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 40px rgba(212,175,55,0.06),
+    inset 0 1px 0 rgba(212,175,55,0.08);
+  padding: 6%;
+  border: 1px solid rgba(212,175,55,0.12);
+  overflow: hidden;
+}
+
+/* Ornate border rings */
+.door-materialize-frame::before {
+  content: '';
+  position: absolute; inset: 4%;
+  border-radius: 26% 26% 3px 3px / 34% 34% 3px 3px;
+  border: 2px solid rgba(212,175,55,0.1);
+  pointer-events: none;
+}
+.door-materialize-frame::after {
+  content: '';
+  position: absolute; inset: 8%;
+  border-radius: 22% 22% 2px 2px / 28% 28% 2px 2px;
+  border: 1px solid rgba(212,175,55,0.05);
+  pointer-events: none;
+}
+
+/* The door panel that swings open */
+.door-materialize-door {
+  position: absolute; inset: 6%;
+  transform-origin: left center;
+  border-radius: 26% 26% 4px 4px / 34% 34% 4px 4px;
+  overflow: hidden;
+}
+
+.door-materialize-arch {
+  width: 100%; height: 100%;
+  border-radius: 26% 26% 4px 4px / 34% 34% 4px 4px;
+  background: linear-gradient(180deg,
+    #2a1a0c 0%, #3a2818 25%, #4a3420 45%,
+    #3a2818 65%, #2a1a0c 85%, #1a0e06 100%
+  );
+  overflow: hidden;
+  position: relative;
+}
+
+/* Wood grain texture lines */
+.door-materialize-arch::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    rgba(160,120,70,0.02) 1px,
+    transparent 2px,
+    transparent 16px
+  );
+  pointer-events: none;
+}
+
+/* Inner door panel */
+.door-materialize-panel {
+  position: absolute; inset: 10%;
+  border-radius: 20% 20% 3px 3px / 26% 26% 3px 3px;
+  background: linear-gradient(180deg, #2a1a0c 0%, #3a2818 30%, #2a1a0c 60%, #1a0e06 100%);
+  box-shadow: inset 0 2px 20px rgba(0,0,0,0.6);
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding-top: 18%;
+}
+
+/* Ornament: top star/diamond */
+.door-materialize-ornament-top {
+  font-size: clamp(1rem, 3vw, 2.2rem);
+  color: #D4AF37;
+  text-shadow: 0 0 30px rgba(212,175,55,0.5);
+  margin-bottom: 6%;
+  opacity: 0;
+}
+
+/* Ornament: decorative ring */
+.door-materialize-ornament-ring {
+  width: clamp(30px, 8vw, 60px); height: clamp(30px, 8vw, 60px);
+  border: 2px solid rgba(212,175,55,0.2);
+  border-radius: 50%;
+  margin-bottom: 8%;
+  position: relative;
+  opacity: 0;
+}
+.door-materialize-ornament-ring::after {
+  content: '\2726';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(0.5rem, 1.2vw, 0.9rem);
+  color: rgba(212,175,55,0.3);
+}
+
+/* Golden knob */
+.door-materialize-knob {
+  width: clamp(16px, 5vw, 34px); height: clamp(16px, 5vw, 34px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #E5C76B, #C8A050, #8A6A20);
+  box-shadow:
+    0 3px 12px rgba(0,0,0,0.5),
+    inset 0 3px 6px rgba(255,255,255,0.25),
+    inset 0 -2px 4px rgba(0,0,0,0.3);
+  position: absolute;
+  right: 12%; top: 56%;
+  opacity: 0;
+}
+.door-materialize-knob::after {
+  content: '';
+  position: absolute; top: 18%; left: 18%;
+  width: 24%; height: 24%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+
+/* Carving detail */
+.door-materialize-carving {
+  position: absolute;
+  bottom: 20%; left: 50%; transform: translateX(-50%);
+  width: 50%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.12), transparent);
+  opacity: 0;
+}
+.door-materialize-carving::after {
+  content: '\2767';
+  position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+  font-size: clamp(0.7rem, 1.6vw, 1.3rem);
+  color: rgba(212,175,55,0.08);
+}
+
+/* Golden light behind door */
+.door-materialize-light {
+  position: absolute; z-index: -1;
+  top: -30%; left: -30%;
+  width: 160%; height: 160%;
+  background: radial-gradient(circle, rgba(212,175,55,0.3), rgba(212,175,55,0.06) 35%, transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== PARTICLES ===== */
+.particles-container {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 5px; height: 5px;
+  background: #D4AF37;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 8px rgba(212,175,55,0.7), 0 0 16px rgba(212,175,55,0.25);
+}
+
+.particle-lg {
+  width: 9px; height: 9px;
+  box-shadow: 0 0 12px rgba(212,175,55,0.9), 0 0 24px rgba(212,175,55,0.35);
+}
+
+/* Text overlay */
+.preloader-text {
+  position: absolute; z-index: 5; text-align: center;
+  bottom: 5%;
+  font-family: 'Cinzel', serif; font-weight: 400;
+  font-size: clamp(0.5rem, 1.2vw, 0.85rem);
+  letter-spacing: 6px; text-transform: uppercase;
+  color: #D4AF37;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* ==============================
+   PAGE 1 - PALACE OF DOORS
+============================== */
+.page-bg-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; z-index: 0;
+}
+.page-overlay-blur {
+  position: absolute; inset: 0; z-index: 1;
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  background: rgba(5,5,5,0.15);
+}
+.page-overlay {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(180deg,
+    rgba(5,5,5,0.5) 0%,
+    rgba(5,5,5,0.3) 30%,
+    rgba(5,5,5,0.4) 60%,
+    rgba(5,5,5,0.7) 100%
+  );
+}
+
+.page-1-content {
+  position: relative; z-index: 3; text-align: center;
+  max-width: 1100px; padding: 1rem;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2.5rem;
+}
+
+.intro-text { max-width: 650px; opacity: 0; }
+.intro-line {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem); line-height: 1.8;
+  color: #C5B78A; font-style: italic;
+  opacity: 0; transform: translateY(15px);
+}
+
+/* ==============================
+   THREE DOORS - REALISTIC PALACE DOORS
+=============================== */
+.doors-container {
+  display: flex; gap: 3.5rem; justify-content: center;
+  flex-wrap: wrap; opacity: 0;
+  perspective: 1200px;
+}
+.door-card {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; cursor: pointer;
+  opacity: 0; transform: translateY(30px);
+  transition: transform 0.4s ease;
+}
+.door-card:hover { transform: translateY(-6px); }
+.door-card:hover .door-knob { box-shadow: 0 2px 12px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.25); }
+
+.door-frame {
+  position: relative;
+  width: 280px; height: 420px;
+  border-radius: 140px 140px 6px 6px;
+  background: linear-gradient(145deg, #3a2a1a, #2a1e10, #1f1508);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.7),
+    0 8px 20px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(200,160,100,0.08);
+  padding: 14px;
+  transition: box-shadow 0.4s ease;
+  border: 1px solid rgba(200,160,100,0.12);
+}
+.door-frame::before {
+  content: '';
+  position: absolute; inset: 5px;
+  border-radius: 135px 135px 4px 4px;
+  border: 2px solid rgba(160,120,70,0.2);
+  pointer-events: none;
+}
+.door-frame::after {
+  content: '';
+  position: absolute; inset: 10px;
+  border-radius: 130px 130px 3px 3px;
+  border: 1px solid rgba(160,120,70,0.06);
+  pointer-events: none;
+}
+
+.door-arch-outline {
+  position: absolute;
+  top: -2px; left: -2px; right: -2px;
+  height: 288px;
+  border-radius: 142px 142px 0 0;
+  border: 2px solid rgba(180,140,90,0.15);
+  pointer-events: none;
+}
+
+.door-arch {
+  width: 100%; height: 100%;
+  border-radius: 126px 126px 4px 4px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(255,255,255,0.008) 1px,
+      transparent 2px,
+      transparent 20px
+    ),
+    linear-gradient(
+      180deg,
+      #4a3420 0%,
+      #5c4030 10%,
+      #6a4c38 25%,
+      #5c4030 45%,
+      #4a3420 65%,
+      #3a2818 85%,
+      #2e1e10 100%
+    );
+  overflow: hidden;
+  position: relative;
+}
+.door-arch::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      rgba(160,120,70,0.02) 1px,
+      transparent 2px,
+      transparent 14px
+    );
+  pointer-events: none;
+}
+
+.door-panel {
+  position: absolute; inset: 12px;
+  border-radius: 114px 114px 3px 3px;
+  background: linear-gradient(180deg, #3a2818 0%, #4a3420 35%, #3a2818 65%, #2e1e10 100%);
+  box-shadow: inset 0 2px 12px rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.door-panel-inner {
+  position: relative;
+  width: 80%; height: 82%;
+  border-radius: 96px 96px 2px 2px;
+  border: 1px solid rgba(160,120,70,0.1);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 18% 0 0 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(200,160,100,0.008) 1px,
+      transparent 2px,
+      transparent 10px
+    );
+}
+
+.door-panel-inner::after {
+  content: '';
+  position: absolute;
+  bottom: 25%; left: 50%; transform: translateX(-50%);
+  width: 55%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160,120,70,0.12), transparent);
+}
+
+.door-knob {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #C8A050, #A07830, #7A5A20);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.3);
+  position: absolute;
+  right: 18px; top: 55%; transform: translateY(-50%);
+  transition: box-shadow 0.3s ease;
+}
+.door-knob::after {
+  content: '';
+  position: absolute; top: 4px; left: 4px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+}
+
+.door-label {
+  font-family: 'Cinzel', serif; font-weight: 400;
+  font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase;
+  color: #C5B78A; transition: color 0.3s ease;
+}
+.door-sub-label {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 0.8rem; color: #8A8A8A;
+}
+
+/* Door states */
+.door-card.correct .door-frame {
+  box-shadow:
+    0 0 60px rgba(212,175,55,0.4),
+    0 0 120px rgba(212,175,55,0.15);
+}
+.door-card.wrong .door-frame {
+  animation: shake 0.5s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+
+/* ==============================
+   WRONG DOOR POPUP
+============================== */
+#wrong-popup {
+  position: fixed; inset: 0; z-index: 150;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(5,5,5,0.7);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.popup-content {
+  background: linear-gradient(135deg, rgba(15,12,8,0.95), rgba(5,5,5,0.95));
+  border: 1px solid rgba(212,175,55,0.2);
+  padding: 2.5rem; text-align: center; max-width: 380px;
+  border-radius: 4px;
+  transform: scale(0.8); opacity: 0;
+}
+.popup-icon {
+  font-size: 2rem; color: #D4AF37; margin-bottom: 0.8rem;
+}
+.popup-title {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2.2rem; color: #D4AF37; margin-bottom: 0.5rem;
+}
+.popup-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; line-height: 1.6; color: #C5B78A;
+  margin-bottom: 1.5rem;
+}
+.popup-btn {
+  background: none; border: 1px solid #D4AF37;
+  color: #D4AF37; padding: 0.5rem 2rem;
+  font-family: 'Inter', sans-serif; font-weight: 300;
+  font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.3s ease;
+}
+.popup-btn:hover { background: rgba(212,175,55,0.1); color: #E5C76B; }
+.popup-btn:focus { outline: none; }
+
+/* ==============================
+   PAGE 2 - ENCHANTED GARDEN
+=============================== */
+#page-2 { justify-content: center; }
+
+.garden-overlay {
+  position: absolute; inset: 0; z-index: 3;
+  background: linear-gradient(180deg,
+    rgba(5,5,5,0.2) 0%,
+    rgba(5,5,5,0.1) 30%,
+    rgba(5,5,5,0.15) 60%,
+    rgba(5,5,5,0.5) 100%
+  );
+}
+
+.garden-scene {
+  position: relative; z-index: 4;
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+}
+
+/* ==============================
+   HANGING LETTERS - NEETI
+=============================== */
+.hanging-letters {
+  display: flex; gap: 3.5rem;
+  align-items: flex-start;
+  height: 40vh;
+}
+.hanging-group {
+  display: flex; flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  opacity: 0;
+}
+.hanging-group[data-index="0"] { height: 30vh; }
+.hanging-group[data-index="1"] { height: 38vh; }
+.hanging-group[data-index="2"] { height: 33vh; }
+.hanging-group[data-index="3"] { height: 40vh; }
+.hanging-group[data-index="4"] { height: 27vh; }
+.chain {
+  width: 6px;
+  flex: 1;
+  background: repeating-linear-gradient(
+    180deg,
+    #c5b78a 0px,
+    #c5b78a 2px,
+    transparent 2px,
+    transparent 10px
+  );
+  border-left: 1px solid rgba(197, 183, 138, 0.2);
+  border-right: 1px solid rgba(197, 183, 138, 0.2);
+  position: relative;
+  min-height: 40px;
+  cursor: pointer;
+}
+.letter {
+  font-family: 'Cinzel', serif;
+  font-size: 8rem; font-weight: 600;
+  color: #F5E6C8;
+  text-shadow: 0 0 40px rgba(212,175,55,0.5), 0 0 80px rgba(212,175,55,0.2);
+  cursor: default;
+  line-height: 1;
+  transition: text-shadow 0.4s ease;
+  flex-shrink: 0;
+  padding-top: 8px;
+}
+.letter:hover {
+  text-shadow: 0 0 60px rgba(212,175,55,0.8), 0 0 120px rgba(212,175,55,0.4);
+}
+
+/* Hover sway handled by GSAP in JS */
+
+/* ==============================
+   GARDEN BOTTOM - GRASS & CHEST
+=============================== */
+.garden-bottom {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+.grass-area {
+  width: 100%; height: 16vh;
+  background: url('../assets/grass-bottom.png') repeat-x bottom center;
+  background-size: auto 100%;
+  position: relative;
+  z-index: 0;
+}
+.chest-wrapper {
+  position: absolute; bottom: 16vh; width: 200px; height: auto;
+  cursor: pointer; pointer-events: auto;
+  z-index: 1;
+}
+.chest-img {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(212,175,55,0.15));
+  transition: filter 0.5s ease;
+}
+.chest-glow {
+  position: absolute; top: -20%; left: -20%;
+  width: 140%; height: 140%;
+  background: radial-gradient(circle, rgba(212,175,55,0.15), transparent 70%);
+  opacity: 0; pointer-events: none;
+  transition: opacity 1s ease;
+}
+.chest-wrapper:hover .chest-img {
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)) drop-shadow(0 0 40px rgba(212,175,55,0.4));
+}
+.chest-wrapper:hover .chest-glow { opacity: 1; }
+
+/* Letter card flying to center - old school burnt love letter */
+.letter-card {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  display: none; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.letter-card-overlay {
+  position: absolute; inset: 0;
+  background: rgba(5,5,5,0.6);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.letter-card-inner {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(245,230,200,0.95) 0%, transparent 100%),
+    radial-gradient(ellipse at 70% 80%, rgba(220,190,140,0.95) 0%, transparent 100%),
+    linear-gradient(160deg, #f5e8c8, #e5d0a0 25%, #dcc696 50%, #d4b080 70%, #c8a070 100%);
+  border: 20px solid transparent;
+  border-image: url('../assets/burnt-paper-edge.png') 30 round;
+  border-radius: 0;
+  padding: 1rem;
+  text-align: left;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    0 0 40px rgba(80,30,8,0.2),
+    inset 0 0 80px rgba(60,20,8,0.12),
+    /* Burnt corner shadows */
+    inset 3px 3px 12px rgba(30,8,2,0.3),
+    inset -3px -3px 12px rgba(30,8,2,0.2),
+    inset 3px -3px 12px rgba(30,8,2,0.15),
+    inset -3px 3px 12px rgba(30,8,2,0.2);
+  max-width: 400px;
+  opacity: 0;
+}
+/* Aged paper texture overlay inside */
+.letter-card-inner::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    /* Paper fiber texture */
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(80,40,16,0.03) 1px,
+      transparent 2px,
+      transparent 38px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      rgba(80,40,16,0.02) 1px,
+      transparent 2px,
+      transparent 30px
+    ),
+    /* Age spots/water damage */
+    radial-gradient(ellipse at 15% 85%, rgba(60,20,8,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 10%, rgba(60,20,8,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(40,12,4,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.letter-card-close {
+  position: absolute; top: 6px; right: 10px;
+  font-size: 1.4rem; color: #6a3a1a; cursor: pointer;
+  font-family: serif; line-height: 1;
+  transition: color 0.3s ease;
+  z-index: 5;
+}
+.letter-card-close:hover { color: #3a1a08; }
+.letter-card-seal {
+  width: 44px; height: 44px;
+  background: radial-gradient(circle at 35% 35%, #c0392b, #8b1a1a);
+  border-radius: 50%; margin: 0 auto 1.2rem;
+  box-shadow: 0 2px 8px rgba(139,26,26,0.5);
+  position: relative;
+}
+.letter-card-seal::after {
+  content: '✦'; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #d4af37; font-size: 1.1rem;
+}
+.letter-card-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; color: #4a2818;
+  font-style: italic; line-height: 1.7;
+  margin-bottom: 1.5rem;
+  min-height: 4em;
+  position: relative; z-index: 1;
+}
+/* Typewriter cursor */
+.typewriter-cursor {
+  display: inline-block;
+  color: #4a2818;
+  animation: blinkCursor 0.8s step-end infinite;
+}
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+/* Signature block - centered */
+.letter-card-signature {
+  text-align: center;
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(80,40,16,0.2);
+  position: relative; z-index: 1;
+}
+.sig-line {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.2rem;
+  color: #2c1810;
+  line-height: 1.6;
+}
+.letter-card-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.6rem; color: #8a6a4a;
+  letter-spacing: 1px; text-transform: uppercase;
+  text-align: center;
+  margin-top: 0.8rem;
+}
+
+/* ==============================
+   CLOUD TRAVEL TRANSITION OVERLAY
+=============================== */
+#cloud-travel {
+  position: fixed; inset: 0; z-index: 150;
+  display: none; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.cloud-bg-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; z-index: 0;
+}
+.cloud-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: rgba(5,5,5,0.35);
+}
+.cloud-content {
+  position: relative; z-index: 2; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; opacity: 0;
+}
+.cloud-icon {
+  font-size: 2.5rem; color: #D4AF37;
+  animation: pulseIcon 1.5s ease-in-out infinite;
+}
+.cloud-text {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem; letter-spacing: 4px; text-transform: uppercase;
+  color: #F5E6C8;
+}
+.cloud-subtext {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1rem; color: #C5B78A;
+}
+.cloud-bar-container {
+  width: 200px; height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px; overflow: hidden;
+  margin-top: 0.5rem;
+}
+.cloud-bar-fill {
+  width: 0%; height: 100%;
+  background: linear-gradient(90deg, #D4AF37, #E5C76B);
+  border-radius: 2px;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width: 1024px) {
+  .door-frame { width: 220px; height: 340px; border-radius: 110px 110px 5px 5px; }
+  .door-frame::before { border-radius: 105px 105px 4px 4px; }
+  .door-frame::after { border-radius: 100px 100px 3px 3px; }
+  .door-arch { border-radius: 96px 96px 3px 3px; }
+  .door-arch-outline { height: 233px; border-radius: 112px 112px 0 0; }
+  .door-panel { border-radius: 86px 86px 2px 2px; }
+  .door-panel-inner { border-radius: 72px 72px 2px 2px; }
+  .hanging-letters { gap: 2.5rem; }
+  .letter { font-size: 6rem; }
+}
+
+@media (max-width: 768px) {
+  .doors-container { gap: 2rem; }
+  .door-frame { width: 180px; height: 260px; border-radius: 90px 90px 4px 4px; }
+  .door-frame::before { border-radius: 86px 86px 3px 3px; }
+  .door-frame::after { border-radius: 80px 80px 3px 3px; }
+  .door-arch-outline { height: 178px; border-radius: 92px 92px 0 0; }
+  .door-arch { border-radius: 78px 78px 3px 3px; }
+  .door-panel { inset: 8px; border-radius: 70px 70px 2px 2px; }
+  .door-panel-inner { border-radius: 62px 62px 2px 2px; }
+  .door-knob { width: 20px; height: 20px; right: 12px; }
+  .door-label { font-size: 0.65rem; letter-spacing: 2px; }
+  .intro-text { padding: 0 1rem; }
+  .page-1-content { gap: 1.5rem; }
+  .intro-line { font-size: clamp(0.75rem, 1.6vw, 0.95rem); }
+  .hanging-letters { gap: 2rem; }
+  .letter { font-size: 5rem; }
+  .hanging-group[data-index="0"] { height: 26vh; }
+  .hanging-group[data-index="1"] { height: 32vh; }
+  .hanging-group[data-index="2"] { height: 28vh; }
+  .hanging-group[data-index="3"] { height: 34vh; }
+  .hanging-group[data-index="4"] { height: 24vh; }
+  .chest-wrapper { bottom: 12vh; width: 160px; }
+  .grass-area { height: 12vh; }
+  .cloud-text { font-size: 1rem; letter-spacing: 3px; }
+  .cloud-subtext { font-size: 0.85rem; }
+}
+
+@media (max-width: 480px) {
+  .door-frame { width: 140px; height: 200px; border-radius: 70px 70px 3px 3px; }
+  .door-frame::before { border-radius: 66px 66px 3px 3px; }
+  .door-frame::after { border-radius: 60px 60px 2px 2px; }
+  .door-arch-outline { height: 137px; border-radius: 72px 72px 0 0; }
+  .door-arch { border-radius: 58px 58px 2px 2px; }
+  .door-panel { inset: 6px; border-radius: 52px 52px 2px 2px; }
+  .door-panel-inner { border-radius: 46px 46px 2px 2px; padding: 15% 0 12% 0; }
+  .door-knob { width: 16px; height: 16px; right: 10px; }
+  .door-card { gap: 0.6rem; }
+  .door-label { font-size: 0.55rem; letter-spacing: 1px; }
+  .door-sub-label { font-size: 0.6rem; }
+  .doors-container { gap: 1.2rem; }
+  .preloader-text { font-size: 0.6rem; letter-spacing: 4px; }
+  .popup-title { font-size: 1.8rem; }
+  .popup-text { font-size: 0.9rem; }
+  .hanging-letters { gap: 1.2rem; height: 35vh; }
+  .letter { font-size: 3.5rem; }
+  .chain { width: 4px; }
+  .hanging-group[data-index="0"] { height: 22vh; }
+  .hanging-group[data-index="1"] { height: 28vh; }
+  .hanging-group[data-index="2"] { height: 24vh; }
+  .hanging-group[data-index="3"] { height: 30vh; }
+  .hanging-group[data-index="4"] { height: 20vh; }
+  .chest-wrapper { bottom: 10vh; width: 110px; }
+  .letter-card-inner { padding: 0.8rem; max-width: 280px; }
+  .letter-card-seal { width: 32px; height: 32px; }
+  .letter-card-text { font-size: 0.85rem; }
+  .sig-line { font-size: 1rem; }
+  .grass-area { height: 10vh; }
+  .cloud-text { font-size: 0.85rem; letter-spacing: 2px; }
+  .cloud-subtext { font-size: 0.75rem; }
+  .cloud-icon { font-size: 2rem; }
+  .cloud-bar-container { width: 160px; }
+  .intro-line { font-size: 0.8rem; }
+}
+
+@media (max-width: 360px) {
+  .doors-container { gap: 0.8rem; }
+  .door-frame { width: 100px; height: 150px; border-radius: 50px 50px 3px 3px; }
+  .door-frame::before { border-radius: 46px 46px 2px 2px; }
+  .door-frame::after { border-radius: 40px 40px 2px 2px; }
+  .door-arch-outline { height: 103px; border-radius: 52px 52px 0 0; }
+  .door-arch { border-radius: 40px 40px 2px 2px; }
+  .door-panel { inset: 5px; border-radius: 36px 36px 2px 2px; }
+  .door-panel-inner { border-radius: 30px 30px 2px 2px; padding: 12% 0 10% 0; }
+  .door-knob { width: 12px; height: 12px; right: 8px; }
+  .door-label { font-size: 0.45rem; letter-spacing: 1px; }
+  .door-sub-label { font-size: 0.5rem; }
+  .door-card { gap: 0.4rem; }
+  .hanging-letters { gap: 0.8rem; height: 30vh; }
+  .letter { font-size: 2.5rem; }
+  .hanging-group[data-index="0"] { height: 18vh; }
+  .hanging-group[data-index="1"] { height: 24vh; }
+  .hanging-group[data-index="2"] { height: 20vh; }
+  .hanging-group[data-index="3"] { height: 26vh; }
+  .hanging-group[data-index="4"] { height: 16vh; }
+  .chest-wrapper { bottom: 8vh; width: 80px; }
+  .grass-area { height: 8vh; }
+  .preloader-text { font-size: 0.45rem; letter-spacing: 3px; }
+  .intro-line { font-size: 0.7rem; }
+  .page-1-content { gap: 1rem; }
+  .popup-content { padding: 1rem; }
+  .popup-title { font-size: 1.4rem; }
+  .letter-card-inner { padding: 0.6rem; max-width: 220px; }
+  .letter-card-text { font-size: 0.75rem; }
+  .sig-line { font-size: 0.85rem; }
+  .letter-card-seal { width: 28px; height: 28px; }
+}
+
+/* Landscape phones */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hanging-letters { height: 60vh; }
+  .letter { font-size: 3rem; }
+  .hanging-group[data-index="0"] { height: 40vh; }
+  .hanging-group[data-index="1"] { height: 48vh; }
+  .hanging-group[data-index="2"] { height: 44vh; }
+  .hanging-group[data-index="3"] { height: 50vh; }
+  .hanging-group[data-index="4"] { height: 36vh; }
+  .grass-area { height: 20vh; }
+  .chest-wrapper { bottom: 20vh; width: 100px; }
+  .preloader-text { font-size: 0.5rem; letter-spacing: 3px; }
+  .intro-line { font-size: 0.7rem; }
+  .door-frame { width: 100px; height: 150px; }
+  .door-arch-outline { height: 103px; border-radius: 52px 52px 0 0; }
+  .door-label { font-size: 0.5rem; letter-spacing: 1px; }
+  .doors-container { gap: 1rem; }
+  .page-1-content { gap: 1rem; }
+  .letter-card-inner { padding: 0.8rem; max-width: 300px; }
+  .letter-card-text { font-size: 0.8rem; }
+  .sig-line { font-size: 0.9rem; }
+}
